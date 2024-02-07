@@ -30,6 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.composetutorial.ui.theme.ComposeTutorialTheme
 
+data class Message(val author: String, val text: String)
+
 @Composable
 fun MyMessage(msg: Message) {
     Row(modifier = Modifier.padding(all = 8.dp)) {
