@@ -34,10 +34,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.composetutorial.ui.theme.ComposeTutorialTheme
 
 
@@ -47,14 +49,14 @@ fun ConversationScreen(
     navController: NavController,
     viewModel: UserViewModel
 ) {
-    val currentUser by viewModel.currentUser.observeAsState()
+    val username by remember {
+        mutableStateOf(viewModel.findUserById(0).username ?: "default_user")
+    }
 
-    var username by remember {
-        mutableStateOf(currentUser?.username?: "")
+    val chosenImg by remember {
+        mutableStateOf(viewModel.findUserByName(username).image)
     }
-    LaunchedEffect(currentUser ) {
-        username = currentUser?.username?: ""
-    }
+
 
     Column() {
         Row {
@@ -84,7 +86,13 @@ fun ConversationScreen(
                 } 
             }
             Text(text = "Current user : ")
-            Text(text = currentUser?.username.toString())
+            Text(text = username.toString())
+            if (!chosenImg.isNullOrEmpty()) {
+                Image(
+                    painter = rememberAsyncImagePainter(chosenImg?.toUri()),
+                    contentDescription = "Profile picture"
+                )
+            }
         }
         Spacer(
             modifier = Modifier

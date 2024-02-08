@@ -1,6 +1,7 @@
 package com.example.composetutorial
 
 import android.R.drawable
+import android.content.Context
 import android.content.res.Configuration
 import android.net.Uri
 import android.util.Log
@@ -27,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.net.toUri
 import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
@@ -47,21 +49,12 @@ fun LoadImage(path: String) {
     )
 }
 
-@Composable
-fun GetContentExample() {
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageUri = uri
-    }
-    Column {
-        Button(onClick = { launcher.launch("image/*") }) {
-            Text(text = "Load Image")
-        }
-        Image(
-            painter = rememberAsyncImagePainter(imageUri),
-            contentDescription = "My Image"
-        )
-    }
+fun copyToAppStorage(context: Context, newUri: Uri): Uri {
+    val input = context.contentResolver.openInputStream(newUri)
+    val outputFile = context.filesDir.resolve("profilepic.jpg")
+    input?.copyTo(outputFile.outputStream())
+    input?.close()
+    return outputFile.toUri()
 }
 
 

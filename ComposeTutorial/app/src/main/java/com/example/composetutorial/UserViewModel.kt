@@ -1,5 +1,6 @@
 package com.example.composetutorial
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,20 +14,24 @@ class UserViewModel(private val userRepository: UserRepository): ViewModel() {
     var currentUser: LiveData<User> = userRepository.findLiveUserById(0)
 
 
-    fun saveUser(userName: String) {
+    fun saveUser(userName: String, imageUri: String?) {
         viewModelScope.launch {
-            val user = User(uid = 0, username = userName)
+            val user = User(uid = 0, username = userName, image = imageUri)
             userRepository.upsertUser(user)
         }
     }
 
-    suspend fun findUserById(uid: Int): User {
+    fun findUserById(uid: Int): User {
         return userRepository.findUserById(uid)
     }
 
-    fun insertDefaultUser(userName: String) {
+    fun findUserByName(name: String): User {
+        return userRepository.findUserByName(name)
+    }
+
+    fun insertDefaultUser(userName: String, imageUri: String) {
         viewModelScope.launch {
-            val user = User(uid = 0, username = userName)
+            val user = User(uid = 0, username = userName, image = imageUri)
             userRepository.insertDefaultUser(user)
         }
     }
@@ -51,8 +56,12 @@ class UserRepository(private val userDao: UserDao) {
         return userDao.getAll()
     }
 
-    suspend fun findUserById(uid: Int): User {
+    fun findUserById(uid: Int): User {
         return userDao.findUserById(uid)
+    }
+
+    fun findUserByName(name: String): User {
+        return userDao.findByName(name)
     }
 
     fun findLiveUserById(uid: Int): LiveData<User> {

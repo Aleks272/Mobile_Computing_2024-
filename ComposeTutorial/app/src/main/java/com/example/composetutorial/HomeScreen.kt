@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.graphics.drawable.Icon
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -47,14 +48,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.composetutorial.ui.theme.ComposeTutorialTheme
+
 
 @Composable
 fun HomeScreen(
@@ -63,21 +67,26 @@ fun HomeScreen(
 ) {
     val currentUser by viewModel.currentUser.observeAsState()
 
+    val context = LocalContext.current
+
+    viewModel.insertDefaultUser("default_user", "uri")
+
     var username by remember {
-        mutableStateOf(currentUser?.username?: "default_user")
-    }
-    LaunchedEffect(currentUser ) {
-        username = currentUser?.username?: "default_user"
+        mutableStateOf(viewModel.findUserById(0).username ?: "default_user")
     }
 
-    viewModel.insertDefaultUser(username)
-
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageUri = uri
+    var chosenImg by remember {
+        mutableStateOf(viewModel.findUserByName(username).image)
     }
-
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = {uri ->
+            if (uri != null) {
+                viewModel.saveUser(username, copyToAppStorage(context,uri).toString())
+            }
+                chosenImg = uri.toString()
+        }
+    )
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -105,7 +114,12 @@ fun HomeScreen(
             })
             IconButton(
                 onClick = {
-                    viewModel.saveUser(username)
+                    if (chosenImg != null) {
+                        viewModel.saveUser(
+                            username,
+                            copyToAppStorage(context, newUri = chosenImg!!.toUri()).toString()
+                        )
+                    }
                 }
             ) {
                 Image(
@@ -120,14 +134,38 @@ fun HomeScreen(
 
         Text(text = currentUser?.username.toString())
 
-        Button(onClick = { launcher.launch("image/*") }) {
+        Button(onClick = {
+            launcher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }) {
             Text(text = "Upload profile picture")
         }
+
         Text(text = "Current picture: ")
-        Image(
-            painter = rememberAsyncImagePainter(imageUri),
-            contentDescription = "Profile picture"
-        )
+        Row(){
+            Image(
+                painter = rememberAsyncImagePainter(chosenImg?.toUri()),
+                contentDescription = "Profile picture"
+            )
+
+            IconButton(
+                onClick = {
+                    if (chosenImg != null) {
+                        viewModel.saveUser(
+                            username,
+                            copyToAppStorage(context, newUri = chosenImg!!.toUri()).toString()
+                        )
+                    }
+                }
+            ) {
+                Image(
+                    painter = painterResource(id = android.R.drawable.ic_menu_save),
+                    contentDescription = "Save picture",
+                    modifier = Modifier
+                        .scale(0.9F)
+                )
+            }
+        }
     }
 }
 

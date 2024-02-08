@@ -19,10 +19,10 @@ interface UserDao {
     suspend fun getAll(): List<User>
 
     @Query("SELECT * FROM user WHERE username LIKE :user LIMIT 1")
-    suspend fun findByName(user: String): User
+    fun findByName(user: String): User
 
     @Query("SELECT * FROM user WHERE uid = :uid")
-    suspend fun findUserById(uid: Int) : User
+    fun findUserById(uid: Int) : User
 
     @Query("SELECT * FROM user WHERE uid = :uid")
     fun findLiveUserById(uid: Int) : LiveData<User>
@@ -39,7 +39,7 @@ interface UserDao {
 
 @Database(
     entities = [User::class],
-    version = 1
+    version = 4
 )
 
 abstract class UserDatabase: RoomDatabase() {
@@ -56,7 +56,11 @@ abstract class UserDatabase: RoomDatabase() {
                     applicationContext,
                     UserDatabase::class.java,
                     "user_database"
-                ).build().also { Instance= it }
+                ).allowMainThreadQueries()
+                    .fallbackToDestructiveMigration()
+                    .build()
+                    .also {
+                        Instance= it }
             }
         }
     }

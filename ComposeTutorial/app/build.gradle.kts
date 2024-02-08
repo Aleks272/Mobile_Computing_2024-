@@ -67,7 +67,7 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
     implementation("io.coil-kt:coil-compose:2.5.0")
-    implementation("androidx.compose.runtime:runtime-livedata:1.6.0")
+    implementation("androidx.compose.runtime:runtime-livedata:1.6.1")
     val nav_version = "2.7.6"
 
     val room_version = "2.6.1"
