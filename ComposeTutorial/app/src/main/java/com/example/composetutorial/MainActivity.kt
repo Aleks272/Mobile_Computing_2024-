@@ -15,6 +15,10 @@ class MainActivity : ComponentActivity() {
                 val userDao = UserDatabase.getDatabase(context).userDao()
                 val userRepository = UserRepository(userDao)
                 val viewModel = UserViewModel(userRepository)
+                val sensor = SensorHandler(viewModel)
+                Notification()
+                lifecycle.addObserver(MyObserver(context))
+                sensor.initSensor(context)
                 AppNavigation(viewModel)
             }
         }

@@ -1,11 +1,17 @@
 package com.example.composetutorial
 
+import android.app.NotificationManager
 import android.content.res.Configuration
 import android.graphics.drawable.Icon
 import android.net.Uri
+import android.content.Context
+import android.content.pm.PackageManager
+import android.hardware.SensorManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -53,7 +59,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
@@ -68,6 +78,10 @@ fun HomeScreen(
     val currentUser by viewModel.currentUser.observeAsState()
 
     val context = LocalContext.current
+
+    val notification = Notification()
+
+    var pressureValue = viewModel.lightData.observeAsState()
 
     viewModel.insertDefaultUser("default_user", "uri")
 
@@ -88,6 +102,24 @@ fun HomeScreen(
         }
     )
 
+    var hasNotificationPermission by remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            mutableStateOf(
+                ContextCompat.checkSelfPermission(
+                    context,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            )
+        } else {
+            mutableStateOf(true)
+        }
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            hasNotificationPermission = isGranted
+            }
+    )
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -166,6 +198,30 @@ fun HomeScreen(
                 )
             }
         }
+        Button(onClick = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+
+        }) {
+            Text(text = "Request notification permission")
+        }
+
+        Button(onClick = {
+            if(hasNotificationPermission) {
+                notification.createNotification(context, "1")
+            }
+        }) {
+            Text(text = "Show notification")
+        }
+
+        Button(onClick = {
+
+
+        }) { Text(text = "Update sensor data") }
+
+
+        Text(text = "Pressure : " + pressureValue.value)
     }
 }
 
@@ -193,8 +249,6 @@ fun PreviewHomeScreen(
         } )
     }
 }
-
-
 
 @Preview(
     name = "Dark Mode",

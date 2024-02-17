@@ -18,7 +18,9 @@ fun AppNavigation(viewModel: UserViewModel){
     startDestination = "Home"
     ) {
         composable("Home") {
-            HomeScreen(navController, viewModel)
+            HomeScreen(
+                navController,
+                viewModel)
         }
         composable("Conversation") {
             ConversationScreen(

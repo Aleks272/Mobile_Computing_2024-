@@ -1,7 +1,9 @@
 package com.example.composetutorial
 
 import android.net.Uri
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -13,7 +15,12 @@ class UserViewModel(private val userRepository: UserRepository): ViewModel() {
 
     var currentUser: LiveData<User> = userRepository.findLiveUserById(0)
 
+    var lightData = MutableLiveData("")
 
+
+    fun setValue(value: String) {
+        lightData.postValue(value)
+    }
     fun saveUser(userName: String, imageUri: String?) {
         viewModelScope.launch {
             val user = User(uid = 0, username = userName, image = imageUri)
