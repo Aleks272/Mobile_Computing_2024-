@@ -29,5 +29,8 @@ fun AppNavigation(viewModel: UserViewModel){
                 viewModel
             )
         }
+        composable("Camera") {
+            CameraScreen(navController, viewModel)
+        }
     }
 }

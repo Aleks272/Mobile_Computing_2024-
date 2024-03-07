@@ -18,7 +18,7 @@ class MyObserver(val context: Context) : DefaultLifecycleObserver {
     }
     override fun onPause(owner: LifecycleOwner) {
         super.onPause(owner)
-        backgroundNotification()
+        //backgroundNotification() used in HW4, removed for convenience
 
     }
 

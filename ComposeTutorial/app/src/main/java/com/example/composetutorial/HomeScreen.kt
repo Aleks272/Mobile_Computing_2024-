@@ -214,11 +214,16 @@ fun HomeScreen(
         }) {
             Text(text = "Show notification")
         }
-
         Button(onClick = {
+            navController.navigate("Camera") {
+                popUpTo("Camera") {
+                    inclusive = true
+                }
+            }
+        }) {
+            Text(text = "Go to camera screen")
+        }
 
-
-        }) { Text(text = "Update sensor data") }
 
 
         Text(text = "Pressure : " + pressureValue.value)

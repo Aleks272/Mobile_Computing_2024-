@@ -1,5 +1,6 @@
 package com.example.composetutorial
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
@@ -8,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -17,7 +19,12 @@ class UserViewModel(private val userRepository: UserRepository): ViewModel() {
 
     var lightData = MutableLiveData("")
 
+    private val privateBitmaps = MutableStateFlow<List<Bitmap>>(emptyList())
+    val bitmaps = privateBitmaps.asStateFlow()
 
+    fun onTakePhoto(bitmap: Bitmap) {
+        privateBitmaps.value += bitmap
+    }
     fun setValue(value: String) {
         lightData.postValue(value)
     }
